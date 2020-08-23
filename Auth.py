@@ -8,7 +8,7 @@ import random
 from json import JSONEncoder
 
 def gen_user_token(length):
-    possible = 'abcdefghijklmnopqrstuvwxyzQWERTYUIOPLKJHGFDSAZXCVBNM<>.:|?{}[]-_+=1234567890!@#$%^&*()'
+    possible = 'abcdefghijklmnopqrstuvwxyzQWERTYUIOPLKJHGFDSAZXCVBNM<>.:|{}[]-_+1234567890!@#$%^&*()'
     return ''.join(random.choices(possible, k = length))
 
 class User:
@@ -85,7 +85,7 @@ def verify(args):
 
 
 def Test(args):
-    return args[0]
+    return "Hello\r\n"
 
 def sanitize(in_bytes):
     pattern = "'(.*?)'"
@@ -115,12 +115,16 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((TCP_IP, TCP_PORT))
 s.listen(1)
 
+print("Server Started")
 while True:
     conn, addr = s.accept()
     print(f'Connection established from {addr}')
     while True:
         data = conn.recv(BUFFER_SIZE)
+        if b'\n' in data:
+            data.replace(b'\n', b'')
         if not data:    break
+        print("New Data")
         output = sanitize(data)
         command = output.split('/')[0]
         args = output.split('/')[1:]
