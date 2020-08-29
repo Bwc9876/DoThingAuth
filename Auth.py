@@ -79,7 +79,10 @@ def verify(args):
         if user.token == in_token:
             return "VT"
         else:
-            return "IT"
+            if user.token == in_token[:-2]:
+                return "VT"
+            else:
+                return "IT"
     else:
         return "IU"
 
@@ -88,9 +91,10 @@ def Test(args):
     return "Hello\r\n"
 
 def sanitize(in_bytes):
-    pattern = "'(.*?)'"
-    out = re.search(pattern, str(in_bytes))
-    return out.group(1)
+	pattern = "'(.*?)'"
+	out = re.search(pattern, str(in_bytes))
+	out = out.group(1)
+	return out
 
 
 commands = {
@@ -117,19 +121,27 @@ s.listen(1)
 
 print("Server Started")
 while True:
-    conn, addr = s.accept()
-    print(f'Connection established from {addr}')
-    while True:
-        data = conn.recv(BUFFER_SIZE)
-        if b'\n' in data:
-            data.replace(b'\n', b'')
-        if not data:    break
-        print("New Data")
-        output = sanitize(data)
-        command = output.split('/')[0]
-        args = output.split('/')[1:]
-        result = commands[command](args)
-        print(result)
-        conn.send(bytes(result, "UTF-8"))
-    conn.close()
-    print(f"Connection to {addr} closed")
+	conn, addr = s.accept()
+	print(f'Connection established from {addr}')
+	while True:
+		data = conn.recv(BUFFER_SIZE)
+		if not data:    break
+		print("New Data")
+		output = sanitize(data)
+		try:
+			if output.split("/")[3][:-2] == "JAVA":
+				java = True
+			else:
+				java = False
+		except IndexError:
+			java = False
+		print(java)
+		command = output.split('/')[0]
+		args = output.split('/')[1:]
+		result = commands[command](args)
+		print(result)
+		if java:
+			result = f'{result}\r\n'
+		conn.send(bytes(result, "UTF-8"))
+	conn.close()
+	print(f"Connection to {addr} closed")
