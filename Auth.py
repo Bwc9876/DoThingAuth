@@ -26,11 +26,11 @@ class Encoder(JSONEncoder):
 
 def save_user(user, update=False):
     if update:
-        if os.path.exists(f'{user.name}.user'):
-            os.remove(f'{user.name}.user')
-    elif update == False and os.path.exists(f'{user.name}.user'):
+        if os.path.exists(f'Users/{user.name}.user'):
+            os.remove(f'Users/{user.name}.user')
+    elif update == False and os.path.exists(f'Users/{user.name}.user'):
         return "Name Taken"
-    f = open(f'{user.name}.user', 'wb+')
+    f = open(f'Users/{user.name}.user', 'wb+')
     instring = Encoder().encode(user)
     iv, to_save = encryption.encrypt_local(instring)
     f.write(iv)
@@ -38,8 +38,8 @@ def save_user(user, update=False):
     f.close()
 
 def read_user(name):
-    if os.path.exists(f'{name}.user'):
-        f = open(f'{name}.user', 'rb')
+    if os.path.exists(f'Users/{name}.user'):
+        f = open(f'Users/{name}.user', 'rb')
         data = f.read()
         f.close()
         return User(None, None, data=encryption.decrypt_local(data))
@@ -88,7 +88,7 @@ def verify(args):
 
 
 def Test(args):
-    return "Hello\r\n"
+    return RemoveNullTerminator(args[0])
 
 def sanitize(in_bytes):
 	pattern = "'(.*?)'"
@@ -112,7 +112,7 @@ def recv_all(conn):
             return b''.join(data)
 
 TCP_IP = '192.168.86.39'
-TCP_PORT = 8080
+TCP_PORT = 8081
 BUFFER_SIZE = 1024
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -138,7 +138,10 @@ while True:
 		print(java)
 		command = output.split('/')[0]
 		args = output.split('/')[1:]
-		result = commands[command](args)
+		try:
+			result = commands[command](args)
+		except KeyError:
+			result = "IC"
 		print(result)
 		if java:
 			result = f'{result}\r\n'
