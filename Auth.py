@@ -128,6 +128,7 @@ while True:
 		if not data:    break
 		print("New Data")
 		output = sanitize(data)
+		print(output)
 		try:
 			if output.split("/")[3][:-2] == "JAVA":
 				java = True
